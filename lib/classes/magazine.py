@@ -1,37 +1,26 @@
 class Magazine:
+    all = []
+
     def __init__(self, name, category):
         self.name = name
         self.category = category
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, value):
-        if not isinstance(value, str) or not (2 <= len(value) <= 16):
-            raise ValueError("Magazine name must be string between 2 and 16 chars")
-        self._name = value
-
-    @property
-    def category(self):
-        return self._category
-
-    @category.setter
-    def category(self, value):
-        if not isinstance(value, str) or len(value) == 0:
-            raise ValueError("Magazine category must be non-empty string")
-        self._category = value
+        Magazine.all.append(self)
 
     def articles(self):
+        from classes.many_to_many import Article
         return [article for article in Article.all if article.magazine is self]
 
     def contributors(self):
-        return list({article.author for article in self.articles()})
+        return list(set(article.author for article in self.articles()))
 
     def article_titles(self):
-        return [article.title for article in self.articles()]
+        titles = [article.title for article in self.articles()]
+        return titles if titles else None   
 
     def contributing_authors(self):
-        return [author for author in self.contributors()
-                if len([a for a in self.articles() if a.author is author]) > 2]
+        authors = []
+        for author in self.contributors():
+            count = len([article for article in self.articles() if article.author == author])
+            if count > 2:
+                authors.append(author)
+        return authors if authors else None   
